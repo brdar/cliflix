@@ -1,7 +1,7 @@
 import { without } from "lodash";
-import * as OpenSubtitles from "opensubtitles-api";
-import * as parseTorrent from "parse-torrent";
-import * as path from "path";
+import OpenSubtitles from "opensubtitles-api";
+import parseTorrent from "parse-torrent";
+import { resolve } from "path";
 import prompt from "inquirer-helpers";
 import { colors } from "./tiny-colors";
 import torrentSearch from "torrent-search-api";
@@ -206,7 +206,7 @@ const ZFlix = {
     const execArgs = ["download", torrent, ...webtorrentOptions];
 
     execaSync("webtorrent", execArgs, {
-      cwd: path.resolve(__dirname, ".."),
+      cwd: resolve(__dirname, ".."),
       stdio: "inherit",
     });
   },
