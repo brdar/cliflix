@@ -1,13 +1,9 @@
-/* IMPORT */
-
 import { castArray } from "lodash";
 import caporal from "caporal";
 import updater from "./tiny-updater";
 import { name, version } from "../package.json";
 import Utils from "./utils";
-import CLIFlix from ".";
-
-/* CLI */
+import ZFlix from ".";
 
 async function CLI() {
   process.on("SIGINT", () => process.exit(1)); // Force quitting
@@ -32,9 +28,9 @@ async function CLI() {
           ? args.slice(doubleDashIndex + 1)
           : [];
 
-      if (!queryOrTorrent) return CLIFlix.wizard(webtorrentOptions);
+      if (!queryOrTorrent) return ZFlix.wizard(webtorrentOptions);
 
-      return CLIFlix.lucky(queryOrTorrent, webtorrentOptions);
+      return ZFlix.lucky(queryOrTorrent, webtorrentOptions);
     });
 
   caporal.parse(process.argv);

@@ -13,7 +13,7 @@ import prompt from "inquirer-helpers";
 /* CONFIG */
 
 const Config = {
-  localConfigPath: path.join(os.homedir(), ".cliflix.json"),
+  localConfigPath: path.join(os.homedir(), ".zflix.json"),
   downloads: {
     path: path.join(os.homedir(), "Downloads"),
     save: true,

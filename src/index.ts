@@ -10,10 +10,10 @@ import Config from "./config";
 import Utils from "./utils";
 import "./temp";
 
-const CLIFlix = {
+const ZFlix = {
   async wizard(webtorrentOptions: string[] = []) {
-    const torrent = await CLIFlix.getTorrent(),
-      magnet = await CLIFlix.getMagnet(torrent);
+    const torrent = await ZFlix.getTorrent(),
+      magnet = await ZFlix.getMagnet(torrent);
 
     if (!magnet) return console.error(colors.red("Magnet not found."));
 
@@ -36,10 +36,7 @@ const CLIFlix = {
           spinner = ora(
             `Waiting for "${colors.bold("OpenSubtitles")}"...`
           ).start(),
-          subtitlesAll = await CLIFlix.getSubtitles(
-            torrent.title,
-            languageCode
-          );
+          subtitlesAll = await ZFlix.getSubtitles(torrent.title, languageCode);
 
         spinner.stop();
 
@@ -79,7 +76,7 @@ const CLIFlix = {
       );
     }
 
-    CLIFlix.stream(magnet, webtorrentOptions);
+    ZFlix.stream(magnet, webtorrentOptions);
   },
 
   async lucky(queryOrTorrent, webtorrentOptions: string[] = []) {
@@ -92,19 +89,19 @@ const CLIFlix = {
 
       torrent = queryOrTorrent;
     } catch (e) {
-      const torrents = await CLIFlix.getTorrents(queryOrTorrent, 1);
+      const torrents = await ZFlix.getTorrents(queryOrTorrent, 1);
 
       if (!torrents.length)
         return console.error(
           colors.red(`No torrents found for "${colors.bold(queryOrTorrent)}"`)
         );
 
-      torrent = await CLIFlix.getMagnet(torrents[0]);
+      torrent = await ZFlix.getMagnet(torrents[0]);
 
       if (!torrent) return console.error(colors.red("Magnet not found."));
     }
 
-    return CLIFlix.stream(torrent, webtorrentOptions);
+    return ZFlix.stream(torrent, webtorrentOptions);
   },
 
   async getTorrents(
@@ -152,19 +149,14 @@ const CLIFlix = {
 
       if (!nextProvider && !nextProviders.length) return [];
 
-      return await CLIFlix.getTorrents(
-        query,
-        rows,
-        nextProvider,
-        nextProviders
-      );
+      return await ZFlix.getTorrents(query, rows, nextProvider, nextProviders);
     }
   },
 
   async getTorrent() {
     while (true) {
       const query = await prompt.input("What do you want to watch?"),
-        torrents = await CLIFlix.getTorrents(query);
+        torrents = await ZFlix.getTorrents(query);
 
       if (!torrents.length) {
         console.error(
@@ -220,4 +212,4 @@ const CLIFlix = {
   },
 };
 
-export default CLIFlix;
+export default ZFlix;
