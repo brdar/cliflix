@@ -49,7 +49,7 @@
     "specialist": "^0.3.0",
     "temp": "^0.8.3",
     "torrent-search-api": "^2.0.3",
-    "webtorrent-cli": "git://github.com/fabiospampinato/webtorrent-cli.git#iina-pip"
+    "webtorrent-cli": "^4.1.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.118",
