@@ -1,6 +1,6 @@
 /* IMPORT */
 
-import * as _ from "lodash";
+import { castArray } from "lodash";
 import caporal from "caporal";
 import { updater } from "specialist";
 import { name, version } from "../package.json";
@@ -21,9 +21,7 @@ async function CLI() {
 
       updater({ name, version });
 
-      args = _.castArray(args.titleTorrent || []).concat(
-        args.webtorrentOptions
-      );
+      args = castArray(args.titleTorrent || []).concat(args.webtorrentOptions);
 
       const doubleDashIndex = args.findIndex((x) => x === "--"),
         hasWebtorrentOptions = doubleDashIndex >= 0,
@@ -42,6 +40,4 @@ async function CLI() {
   caporal.parse(process.argv);
 }
 
-/* EXPORT */
-
-export default CLI;
+CLI();
