@@ -47,9 +47,9 @@
     "prettysize": "^0.1.0",
     "request": "^2.88.0",
     "request-promise-native": "^1.0.5",
-    "specialist": "^0.3.0",
-    "temp": "^0.8.3",
-    "torrent-search-api": "^2.0.3",
+    "specialist": "^0.4.3",
+    "temp": "^0.9.4",
+    "torrent-search-api": "^2.1.4",
     "webtorrent-cli": "^4.1.0"
   },
   "devDependencies": {
