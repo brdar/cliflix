@@ -6,6 +6,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
+    "start": "tsc --skipLibCheck && tstei && node dist/src/bin/index.js",
     "clean": "rimraf dist",
     "compile": "tsc --skipLibCheck && tstei",
     "compile:watch": "tsc --skipLibCheck --watch",
@@ -55,7 +56,7 @@
     "@types/lodash": "^4.14.118",
     "@types/node": "^10.12.8",
     "rimraf": "^2.6.2",
-    "typescript": "~3.0.3",
+    "typescript": "^5.2.2",
     "typescript-transform-export-interop": "^1.0.1"
   },
   "engines": {
