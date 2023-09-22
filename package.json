@@ -6,7 +6,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "scripts": {
-    "start": "tsc --skipLibCheck && tstei && node dist/src/bin/index.js",
+    "start": "tsc --skipLibCheck && node dist/src/bin/index.js",
     "clean": "rimraf dist",
     "compile": "tsc --skipLibCheck && tstei",
     "compile:watch": "tsc --skipLibCheck --watch",

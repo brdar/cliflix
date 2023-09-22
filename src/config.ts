@@ -3,7 +3,7 @@
 import * as _ from "lodash";
 import * as fs from "fs";
 import * as JSON5 from "json5";
-import * as localeCode from "locale-code";
+import localeCode from "locale-code";
 import * as os from "os";
 import * as osLocale from "os-locale";
 import * as path from "path";
@@ -187,7 +187,6 @@ function initPrompt() {
 
 function initLocale() {
   const locale = osLocale.sync().replace("_", "-"),
-    //@ts-ignore
     languageName = localeCode.getLanguageName(locale),
     language = Config.subtitles.languages.available.find((language) =>
       language.startsWith(languageName)

@@ -1,218 +1,227 @@
-
 /* IMPORT */
 
-import * as _ from 'lodash';
-import * as execa from 'execa';
-import * as OpenSubtitles from 'opensubtitles-api';
-import * as parseTorrent from 'parse-torrent';
-import * as path from 'path';
-import prompt from 'inquirer-helpers';
-import {color} from 'specialist';
-import * as torrentSearch from 'torrent-search-api';
-import * as ora from 'ora';
-import Config from './config';
-import Utils from './utils';
-import './temp';
+import { without } from "lodash";
+import execa from "execa";
+import * as OpenSubtitles from "opensubtitles-api";
+import * as parseTorrent from "parse-torrent";
+import * as path from "path";
+import prompt from "inquirer-helpers";
+import { color } from "specialist";
+import torrentSearch from "torrent-search-api";
+import ora from "ora";
+import Config from "./config";
+import Utils from "./utils";
+import "./temp";
 
 /* CLIFIX */
 
 const CLIFlix = {
+  async wizard(webtorrentOptions: string[] = []) {
+    const torrent = await CLIFlix.getTorrent(),
+      magnet = await CLIFlix.getMagnet(torrent);
 
-  async wizard ( webtorrentOptions: string[] = [] ) {
+    if (!magnet) return console.error(color.red("Magnet not found."));
 
-    const torrent = await CLIFlix.getTorrent (),
-          magnet = await CLIFlix.getMagnet ( torrent );
+    if (
+      (Config.subtitles.languages.available.length ||
+        Config.subtitles.languages.favorites.length) &&
+      !Utils.webtorrent.options.isSubtitlesSet(webtorrentOptions)
+    ) {
+      const subbed = await prompt.noYes("Do you want subtitles?");
 
-    if ( !magnet ) return console.error ( color.red ( 'Magnet not found.' ) );
+      if (subbed) {
+        const languageName = await prompt.list(
+            "Which language?",
+            Utils.prompt.parseList(
+              Config.subtitles.languages.available,
+              Config.subtitles.languages.favorites
+            )
+          ),
+          languageCode = Utils.language.getCode(languageName),
+          spinner = ora(
+            `Waiting for "${color.bold("OpenSubtitles")}"...`
+          ).start(),
+          subtitlesAll = await CLIFlix.getSubtitles(
+            torrent.title,
+            languageCode
+          );
 
-    if ( ( Config.subtitles.languages.available.length || Config.subtitles.languages.favorites.length ) && !Utils.webtorrent.options.isSubtitlesSet ( webtorrentOptions ) ) {
+        spinner.stop();
 
-      const subbed = await prompt.noYes ( 'Do you want subtitles?' );
+        if (!subtitlesAll.length) {
+          const okay = await prompt.noYes(
+            `No subtitles found for "${languageName}", play it anyway?`
+          );
 
-      if ( subbed ) {
-
-        const languageName = await prompt.list ( 'Which language?', Utils.prompt.parseList ( Config.subtitles.languages.available, Config.subtitles.languages.favorites ) ),
-              languageCode = Utils.language.getCode ( languageName ),
-              spinner = ora ( `Waiting for "${color.bold ( 'OpenSubtitles' ) }"...` ).start (),
-              subtitlesAll = await CLIFlix.getSubtitles ( torrent.title, languageCode );
-
-        spinner.stop ();
-
-        if ( !subtitlesAll.length ) {
-
-          const okay = await prompt.noYes ( `No subtitles found for "${languageName}", play it anyway?` );
-
-          if ( !okay ) return;
-
+          if (!okay) return;
         } else {
+          const subtitles = await Utils.prompt.subtitles(
+              "Which subtitles?",
+              subtitlesAll
+            ),
+            stream = await Utils.subtitles.download(subtitles);
 
-          const subtitles = await Utils.prompt.subtitles ( 'Which subtitles?', subtitlesAll ),
-                stream = await Utils.subtitles.download ( subtitles );
-
-          Utils.webtorrent.options.setSubtitles ( webtorrentOptions, stream.path );
-
+          Utils.webtorrent.options.setSubtitles(webtorrentOptions, stream.path);
         }
-
       }
-
     }
 
-    if ( ( Config.outputs.available.length || Config.outputs.favorites.length ) && !Utils.webtorrent.options.isAppSet ( webtorrentOptions ) ) {
+    if (
+      (Config.outputs.available.length || Config.outputs.favorites.length) &&
+      !Utils.webtorrent.options.isAppSet(webtorrentOptions)
+    ) {
+      const app = await prompt.list(
+        "Which app?",
+        Utils.prompt.parseList(
+          Config.outputs.available,
+          Config.outputs.favorites
+        )
+      );
 
-      const app = await prompt.list ( 'Which app?', Utils.prompt.parseList ( Config.outputs.available, Config.outputs.favorites ) );
-
-      webtorrentOptions = Utils.webtorrent.options.setApp ( webtorrentOptions, app );
-
+      webtorrentOptions = Utils.webtorrent.options.setApp(
+        webtorrentOptions,
+        app
+      );
     }
 
-    CLIFlix.stream ( magnet, webtorrentOptions );
-
+    CLIFlix.stream(magnet, webtorrentOptions);
   },
 
-  async lucky ( queryOrTorrent, webtorrentOptions: string[] = [] ) { //TODO: Maybe add subtitles support
+  async lucky(queryOrTorrent, webtorrentOptions: string[] = []) {
+    //TODO: Maybe add subtitles support
 
     let torrent;
 
     try {
-
-      parseTorrent ( queryOrTorrent );
+      parseTorrent(queryOrTorrent);
 
       torrent = queryOrTorrent;
+    } catch (e) {
+      const torrents = await CLIFlix.getTorrents(queryOrTorrent, 1);
 
-    } catch ( e ) {
+      if (!torrents.length)
+        return console.error(
+          color.red(`No torrents found for "${color.bold(queryOrTorrent)}"`)
+        );
 
-      const torrents = await CLIFlix.getTorrents ( queryOrTorrent, 1 );
+      torrent = await CLIFlix.getMagnet(torrents[0]);
 
-      if ( !torrents.length ) return console.error ( color.red ( `No torrents found for "${color.bold ( queryOrTorrent )}"` ) );
-
-      torrent = await CLIFlix.getMagnet ( torrents[0] );
-
-      if ( !torrent ) return console.error ( color.red ( 'Magnet not found.' ) );
-
+      if (!torrent) return console.error(color.red("Magnet not found."));
     }
 
-    return CLIFlix.stream ( torrent, webtorrentOptions );
-
+    return CLIFlix.stream(torrent, webtorrentOptions);
   },
 
-  async getTorrents ( query, rows = Config.torrents.limit, provider = Config.torrents.providers.active, providers = Config.torrents.providers.available ) {
-
+  async getTorrents(
+    query,
+    rows = Config.torrents.limit,
+    provider = Config.torrents.providers.active,
+    providers = Config.torrents.providers.available
+  ) {
     const hasProvider = !!provider;
 
-    if ( !provider ) {
-
-      provider = await prompt.list ( 'Which torrents provider?', providers );
-
+    if (!provider) {
+      provider = await prompt.list("Which torrents provider?", providers);
     }
 
     const categories = {
-      ThePirateBay: 'Video',
-      TorrentProject: 'Video'
+      ThePirateBay: "Video",
+      TorrentProject: "Video",
     };
 
-    const category = categories[provider] || 'All',
-          spinner = ora ( `Waiting for "${color.bold ( provider )}"...` ).start ();
+    const category = categories[provider] || "All",
+      spinner = ora(`Waiting for "${color.bold(provider)}"...`).start();
 
     try {
+      torrentSearch.disableAllProviders();
+      torrentSearch.enableProvider(provider);
 
-      torrentSearch.disableAllProviders ();
-      torrentSearch.enableProvider ( provider );
+      const torrents = await torrentSearch.search(query, category, rows);
 
-      const torrents = await torrentSearch.search ( query, category, rows );
+      spinner.stop();
 
-      spinner.stop ();
-
-      if ( !torrents.length ) throw new Error ( 'No torrents found.' );
+      if (!torrents.length) throw new Error("No torrents found.");
 
       return torrents;
+    } catch (e) {
+      spinner.stop();
 
-    } catch ( e ) {
+      console.error(
+        color.yellow(`No torrents found via "${color.bold(provider)}"`)
+      );
 
-      spinner.stop ();
+      const nextProviders = without(providers, provider),
+        nextProvider = hasProvider
+          ? providers[providers.indexOf(provider) + 1]
+          : "";
 
-      console.error ( color.yellow ( `No torrents found via "${color.bold ( provider )}"` ) );
+      if (!nextProvider && !nextProviders.length) return [];
 
-      const nextProviders = _.without ( providers, provider ),
-            nextProvider = hasProvider ? providers[providers.indexOf ( provider ) + 1] : '';
-
-      if ( !nextProvider && !nextProviders.length ) return [];
-
-      return await CLIFlix.getTorrents ( query, rows, nextProvider, nextProviders );
-
+      return await CLIFlix.getTorrents(
+        query,
+        rows,
+        nextProvider,
+        nextProviders
+      );
     }
-
   },
 
-  async getTorrent () {
+  async getTorrent() {
+    while (true) {
+      const query = await prompt.input("What do you want to watch?"),
+        torrents = await CLIFlix.getTorrents(query);
 
-    while ( true ) {
-
-      const query = await prompt.input ( 'What do you want to watch?' ),
-            torrents = await CLIFlix.getTorrents ( query );
-
-      if ( !torrents.length ) {
-
-        console.error ( color.yellow ( `No torrents found for "${color.bold ( query )}", try another query.` ) );
+      if (!torrents.length) {
+        console.error(
+          color.yellow(
+            `No torrents found for "${color.bold(query)}", try another query.`
+          )
+        );
 
         continue;
-
       }
 
-      return await Utils.prompt.title ( 'Which torrent?', torrents );
-
+      return await Utils.prompt.title("Which torrent?", torrents);
     }
-
   },
 
-  async getMagnet ( torrent ) {
-
+  async getMagnet(torrent) {
     try {
-
-      return await torrentSearch.getMagnet ( torrent );
-
-    } catch ( e ) {
-
+      return await torrentSearch.getMagnet(torrent);
+    } catch (e) {
       return;
-
     }
-
   },
 
-  async getSubtitles ( query, language ) {
-
+  async getSubtitles(query, language) {
     try {
-
-      const OS = new OpenSubtitles ( Config.subtitles.opensubtitles );
-      const results = await OS.search ({
+      const OS = new OpenSubtitles(Config.subtitles.opensubtitles);
+      const results = await OS.search({
         sublanguageid: language,
         limit: Config.subtitles.limit,
-        query
+        query,
       });
 
-      return results[Object.keys ( results )[0]] || [];
-
-    } catch ( e ) {
-
+      return results[Object.keys(results)[0]] || [];
+    } catch (e) {
       return [];
-
     }
-
   },
 
-  async stream ( torrent, webtorrentOptions: string[] = [] ) {
+  async stream(torrent, webtorrentOptions: string[] = []) {
+    webtorrentOptions = Utils.webtorrent.options.parse(
+      webtorrentOptions,
+      Config.webtorrent.options
+    );
 
-    webtorrentOptions = Utils.webtorrent.options.parse ( webtorrentOptions, Config.webtorrent.options );
+    const execArgs = ["download", torrent, ...webtorrentOptions],
+      execOpts = {
+        cwd: path.resolve(__dirname, ".."),
+        stdio: "inherit",
+      };
 
-    const execArgs = ['download', torrent, ...webtorrentOptions],
-          execOpts = {
-            cwd: path.resolve ( __dirname, '..' ),
-            stdio: 'inherit'
-          };
-
-    execa.sync ( 'webtorrent', execArgs, execOpts );
-
-  }
-
+    execa.sync("webtorrent", execArgs, execOpts);
+  },
 };
 
 /* EXPORT */
