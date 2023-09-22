@@ -1,7 +1,6 @@
 /* IMPORT */
 
 import { without } from "lodash";
-import execa from "execa";
 import * as OpenSubtitles from "opensubtitles-api";
 import * as parseTorrent from "parse-torrent";
 import * as path from "path";
@@ -214,13 +213,14 @@ const CLIFlix = {
       Config.webtorrent.options
     );
 
-    const execArgs = ["download", torrent, ...webtorrentOptions],
-      execOpts = {
-        cwd: path.resolve(__dirname, ".."),
-        stdio: "inherit",
-      };
+    const { execaSync } = await import("execa");
 
-    execa.sync("webtorrent", execArgs, execOpts);
+    const execArgs = ["download", torrent, ...webtorrentOptions];
+
+    execaSync("webtorrent", execArgs, {
+      cwd: path.resolve(__dirname, ".."),
+      stdio: "inherit",
+    });
   },
 };
 
