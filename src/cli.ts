@@ -5,7 +5,7 @@ import { name, version } from "../package.json";
 import Utils from "./utils";
 import ZFlix from ".";
 
-async function CLI() {
+export async function CLI() {
   process.on("SIGINT", () => process.exit(1)); // Force quitting
 
   caporal
@@ -35,5 +35,3 @@ async function CLI() {
 
   caporal.parse(process.argv);
 }
-
-CLI();
