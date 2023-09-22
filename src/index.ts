@@ -1,25 +1,21 @@
-/* IMPORT */
-
 import { without } from "lodash";
 import * as OpenSubtitles from "opensubtitles-api";
 import * as parseTorrent from "parse-torrent";
 import * as path from "path";
 import prompt from "inquirer-helpers";
-import { color } from "specialist";
+import { colors } from "./tiny-colors";
 import torrentSearch from "torrent-search-api";
 import ora from "ora";
 import Config from "./config";
 import Utils from "./utils";
 import "./temp";
 
-/* CLIFIX */
-
 const CLIFlix = {
   async wizard(webtorrentOptions: string[] = []) {
     const torrent = await CLIFlix.getTorrent(),
       magnet = await CLIFlix.getMagnet(torrent);
 
-    if (!magnet) return console.error(color.red("Magnet not found."));
+    if (!magnet) return console.error(colors.red("Magnet not found."));
 
     if (
       (Config.subtitles.languages.available.length ||
@@ -38,7 +34,7 @@ const CLIFlix = {
           ),
           languageCode = Utils.language.getCode(languageName),
           spinner = ora(
-            `Waiting for "${color.bold("OpenSubtitles")}"...`
+            `Waiting for "${colors.bold("OpenSubtitles")}"...`
           ).start(),
           subtitlesAll = await CLIFlix.getSubtitles(
             torrent.title,
@@ -100,12 +96,12 @@ const CLIFlix = {
 
       if (!torrents.length)
         return console.error(
-          color.red(`No torrents found for "${color.bold(queryOrTorrent)}"`)
+          colors.red(`No torrents found for "${colors.bold(queryOrTorrent)}"`)
         );
 
       torrent = await CLIFlix.getMagnet(torrents[0]);
 
-      if (!torrent) return console.error(color.red("Magnet not found."));
+      if (!torrent) return console.error(colors.red("Magnet not found."));
     }
 
     return CLIFlix.stream(torrent, webtorrentOptions);
@@ -129,7 +125,7 @@ const CLIFlix = {
     };
 
     const category = categories[provider] || "All",
-      spinner = ora(`Waiting for "${color.bold(provider)}"...`).start();
+      spinner = ora(`Waiting for "${colors.bold(provider)}"...`).start();
 
     try {
       torrentSearch.disableAllProviders();
@@ -146,7 +142,7 @@ const CLIFlix = {
       spinner.stop();
 
       console.error(
-        color.yellow(`No torrents found via "${color.bold(provider)}"`)
+        colors.yellow(`No torrents found via "${colors.bold(provider)}"`)
       );
 
       const nextProviders = without(providers, provider),
@@ -172,8 +168,8 @@ const CLIFlix = {
 
       if (!torrents.length) {
         console.error(
-          color.yellow(
-            `No torrents found for "${color.bold(query)}", try another query.`
+          colors.yellow(
+            `No torrents found for "${colors.bold(query)}", try another query.`
           )
         );
 
@@ -223,7 +219,5 @@ const CLIFlix = {
     });
   },
 };
-
-/* EXPORT */
 
 export default CLIFlix;

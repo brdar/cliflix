@@ -2,7 +2,7 @@
 
 import { castArray } from "lodash";
 import caporal from "caporal";
-import { updater } from "specialist";
+import updater from "./tiny-updater";
 import { name, version } from "../package.json";
 import Utils from "./utils";
 import CLIFlix from ".";

@@ -7,7 +7,7 @@ import localeCode from "locale-code";
 import * as os from "os";
 import * as osLocale from "os-locale";
 import * as path from "path";
-import { color } from "specialist";
+import { colors } from "./tiny-colors";
 import prompt from "inquirer-helpers";
 
 /* CONFIG */
@@ -212,8 +212,8 @@ function initLocalConfig() {
 
     if (_.isError(localConfig)) {
       console.error(
-        color.red(
-          `Error reading the configuration file (${color.bold(
+        colors.red(
+          `Error reading the configuration file (${colors.bold(
             Config.localConfigPath
           )}). Is it properly formatted JSON?`
         )

@@ -9,9 +9,9 @@ import prompt from "inquirer-helpers";
 import isOnline from "is-online";
 import * as prettySize from "prettysize";
 import * as request from "request-promise-native";
-import { color } from "specialist";
 import * as temp from "temp";
 import Config from "./config";
+import { colors } from "./tiny-colors";
 
 /* UTILS */
 
@@ -21,7 +21,7 @@ const Utils = {
 
     if (!online)
       throw new Error(
-        color.red("Looks like you are offline, try again later.\n")
+        colors.red("Looks like you are offline, try again later.\n")
       );
   },
 
