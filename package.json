@@ -1,6 +1,6 @@
 {
   "name": "zflix",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Watch anything instantaneously, just write its name.",
   "bin": "dist/src/bin/cli.js",
   "main": "dist/src/bin/cli.js",
@@ -17,7 +17,7 @@
   },
   "license": "MIT",
   "author": {
-    "name": "Dr.Zonza",
+    "name": "Fabio Spampinato, Dr.Zonza",
     "email": "ajmetraume@gmail.com"
   },
   "repository": {
