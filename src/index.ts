@@ -202,10 +202,9 @@ const ZFlix = {
     );
 
     const { execaSync } = await import("execa");
+    const execArgs = ["webtorrent", "download", torrent, ...webtorrentOptions];
 
-    const execArgs = ["download", torrent, ...webtorrentOptions];
-
-    execaSync("webtorrent", execArgs, {
+    execaSync("npx", execArgs, {
       cwd: resolve(__dirname, ".."),
       stdio: "inherit",
     });
