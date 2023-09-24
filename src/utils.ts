@@ -1,8 +1,6 @@
-/* IMPORT */
-
-import * as _ from "lodash";
+import { difference, isNumber, isString, indexOf } from "lodash";
 import * as filesizeParser from "filesize-parser";
-import * as fs from "fs";
+import { createWriteStream } from "fs";
 import * as inquirer from "inquirer";
 import * as path from "path";
 import prompt from "inquirer-helpers";
@@ -12,8 +10,6 @@ import * as request from "request-promise-native";
 import * as temp from "temp";
 import Config from "./config";
 import { colors } from "./tiny-colors";
-
-/* UTILS */
 
 const Utils = {
   async checkConnection() {
@@ -27,7 +23,7 @@ const Utils = {
 
   prompt: {
     parseList(list: string[], favorites: string[] = []) {
-      list = _.difference(list, favorites);
+      list = difference(list, favorites);
 
       if (!list.length) return favorites;
       if (!favorites.length) return list;
@@ -38,10 +34,10 @@ const Utils = {
     async title(message, titles) {
       /* CHECKS */
 
-      const hasSeeders = titles[0] && _.isNumber(titles[0].seeds),
-        hasLeechers = titles[0] && _.isNumber(titles[0].peers),
-        hasSize = titles[0] && _.isString(titles[0].size),
-        hasTime = titles[0] && _.isString(titles[0].time);
+      const hasSeeders = titles[0] && isNumber(titles[0].seeds),
+        hasLeechers = titles[0] && isNumber(titles[0].peers),
+        hasSize = titles[0] && isString(titles[0].size),
+        hasTime = titles[0] && isString(titles[0].time);
 
       /* TABLE */
 
@@ -126,7 +122,7 @@ const Utils = {
     async download({ url, filename }) {
       const content = await request(url),
         stream = Config.downloads.save
-          ? fs.createWriteStream(path.join(Config.downloads.path, filename))
+          ? createWriteStream(path.join(Config.downloads.path, filename))
           : temp.createWriteStream();
 
       stream.write(content);
@@ -394,17 +390,15 @@ const Utils = {
     getCode(name) {
       const { codes, names } = Utils.language;
 
-      return codes[_.indexOf(names, name)];
+      return codes[indexOf(names, name)];
     },
 
     getName(code) {
       const { codes, names } = Utils.language;
 
-      return names[_.indexOf(codes, code)];
+      return names[indexOf(codes, code)];
     },
   },
 };
-
-/* EXPORT */
 
 export default Utils;

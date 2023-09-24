@@ -3,9 +3,9 @@ import caporal from "caporal";
 import updater from "./tiny-updater";
 import { name, version } from "../package.json";
 import Utils from "./utils";
-import ZFlix from ".";
+import { Zflix } from "./zflix";
 
-export async function CLI() {
+export async function cli() {
   process.on("SIGINT", () => process.exit(1)); // Force quitting
 
   caporal
@@ -28,9 +28,11 @@ export async function CLI() {
           ? args.slice(doubleDashIndex + 1)
           : [];
 
-      if (!queryOrTorrent) return ZFlix.wizard(webtorrentOptions);
+      const zflix = new Zflix();
 
-      return ZFlix.lucky(queryOrTorrent, webtorrentOptions);
+      if (!queryOrTorrent) return zflix.wizard(webtorrentOptions);
+
+      return zflix.lucky(queryOrTorrent, webtorrentOptions);
     });
 
   caporal.parse(process.argv);

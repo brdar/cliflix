@@ -10,10 +10,10 @@ import Config from "./config";
 import Utils from "./utils";
 import "./temp";
 
-const ZFlix = {
+export class Zflix {
   async wizard(webtorrentOptions: string[] = []) {
-    const torrent = await ZFlix.getTorrent(),
-      magnet = await ZFlix.getMagnet(torrent);
+    const torrent = await this.getTorrent(),
+      magnet = await this.getMagnet(torrent);
 
     if (!magnet) return console.error(colors.red("Magnet not found."));
 
@@ -36,7 +36,7 @@ const ZFlix = {
           spinner = ora(
             `Waiting for "${colors.bold("OpenSubtitles")}"...`
           ).start(),
-          subtitlesAll = await ZFlix.getSubtitles(torrent.title, languageCode);
+          subtitlesAll = await this.getSubtitles(torrent.title, languageCode);
 
         spinner.stop();
 
@@ -76,36 +76,32 @@ const ZFlix = {
       );
     }
 
-    ZFlix.stream(magnet, webtorrentOptions);
-  },
+    this.stream(magnet, webtorrentOptions);
+  }
 
-  async lucky(queryOrTorrent, webtorrentOptions: string[] = []) {
-    //TODO: Maybe add subtitles support
-
-    let torrent;
+  async lucky(queryOrTorrent: string, webtorrentOptions: string[] = []) {
+    let torrent = queryOrTorrent;
 
     try {
       parseTorrent(queryOrTorrent);
-
-      torrent = queryOrTorrent;
     } catch (e) {
-      const torrents = await ZFlix.getTorrents(queryOrTorrent, 1);
+      const torrents = await this.getTorrents(queryOrTorrent, 1);
 
       if (!torrents.length)
         return console.error(
           colors.red(`No torrents found for "${colors.bold(queryOrTorrent)}"`)
         );
 
-      torrent = await ZFlix.getMagnet(torrents[0]);
+      torrent = await this.getMagnet(torrents[0]);
 
       if (!torrent) return console.error(colors.red("Magnet not found."));
     }
 
-    return ZFlix.stream(torrent, webtorrentOptions);
-  },
+    return this.stream(torrent, webtorrentOptions);
+  }
 
-  async getTorrents(
-    query,
+  private async getTorrents(
+    query: string,
     rows = Config.torrents.limit,
     provider = Config.torrents.providers.active,
     providers = Config.torrents.providers.available
@@ -149,14 +145,14 @@ const ZFlix = {
 
       if (!nextProvider && !nextProviders.length) return [];
 
-      return await ZFlix.getTorrents(query, rows, nextProvider, nextProviders);
+      return await this.getTorrents(query, rows, nextProvider, nextProviders);
     }
-  },
+  }
 
-  async getTorrent() {
+  private async getTorrent() {
     while (true) {
       const query = await prompt.input("What do you want to watch?"),
-        torrents = await ZFlix.getTorrents(query);
+        torrents = await this.getTorrents(query);
 
       if (!torrents.length) {
         console.error(
@@ -170,17 +166,17 @@ const ZFlix = {
 
       return await Utils.prompt.title("Which torrent?", torrents);
     }
-  },
+  }
 
-  async getMagnet(torrent) {
+  private async getMagnet(torrent: torrentSearch.Torrent) {
     try {
       return await torrentSearch.getMagnet(torrent);
     } catch (e) {
       return;
     }
-  },
+  }
 
-  async getSubtitles(query, language) {
+  private async getSubtitles(query: string, language: string) {
     try {
       const OS = new OpenSubtitles(Config.subtitles.opensubtitles);
       const results = await OS.search({
@@ -193,9 +189,9 @@ const ZFlix = {
     } catch (e) {
       return [];
     }
-  },
+  }
 
-  async stream(torrent, webtorrentOptions: string[] = []) {
+  private async stream(torrent: string, webtorrentOptions: string[] = []) {
     webtorrentOptions = Utils.webtorrent.options.parse(
       webtorrentOptions,
       Config.webtorrent.options
@@ -208,7 +204,5 @@ const ZFlix = {
       cwd: resolve(__dirname, ".."),
       stdio: "inherit",
     });
-  },
-};
-
-export default ZFlix;
+  }
+}

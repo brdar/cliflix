@@ -49,13 +49,14 @@
     "request": "^2.88.2",
     "request-promise-native": "^1.0.9",
     "temp": "^0.9.4",
-    "tiny-updater": "^3.5.1",
     "torrent-search-api": "^2.1.4",
     "webtorrent-cli": "^4.1.0"
   },
   "devDependencies": {
     "@types/lodash": "^4.14.198",
     "@types/node": "^20.6.3",
+    "@types/parse-torrent": "^5.8.5",
+    "@types/torrent-search-api": "^2.0.1",
     "rimraf": "^5.0.1",
     "typescript": "^5.2.2"
   },
